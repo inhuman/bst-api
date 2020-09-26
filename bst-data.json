@@ -1,0 +1,32 @@
+{
+  "key": 8,
+  "value": "root",
+  "left": {
+    "key": 4,
+    "value": "4",
+    "left": {
+      "key": 2,
+      "value": "2"
+    },
+    "right": {
+      "key": 6,
+      "value": "6",
+      "right": {
+        "key": 7,
+        "value": "7"
+      }
+    }
+  },
+  "right": {
+    "key": 10,
+    "value": "10",
+    "left": {
+      "key": 9,
+      "value": "9"
+    },
+    "right": {
+      "key": 11,
+      "value": "11"
+    }
+  }
+}
