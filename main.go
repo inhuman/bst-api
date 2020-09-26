@@ -10,6 +10,10 @@ import (
 	"os"
 )
 
+// TODO: add tests for other packages
+// TODO: add travis
+// TODO: add code coverage
+
 func main() {
 
 	l := log.NewLogger()

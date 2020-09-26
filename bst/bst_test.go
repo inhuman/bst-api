@@ -75,16 +75,16 @@ func TestTreeNode_Insert(t *testing.T) {
 	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
 
-	err = Insert(con.Root, 2, "2")
+	err = con.Insert(con.Root, 2, "2")
 	assert.NoError(t, err)
 
-	err = Insert(con.Root, 12, "12")
+	err = con.Insert(con.Root, 12, "12")
 	assert.NoError(t, err)
 
-	err = Insert(con.Root, 11, "11")
+	err = con.Insert(con.Root, 11, "11")
 	assert.NoError(t, err)
 
-	err = Insert(con.Root, 4, "4")
+	err = con.Insert(con.Root, 4, "4")
 	assert.NoError(t, err)
 
 	assert.Equal(t, 10, con.Root.Key)
@@ -102,7 +102,7 @@ func TestTreeNode_InsertExists(t *testing.T) {
 	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
 
-	err = Insert(con.Root, 10, "10")
+	err = con.Insert(con.Root, 10, "10")
 	assert.Error(t, err, "key exists")
 }
 
@@ -113,16 +113,16 @@ func TestTreeNode_Find(t *testing.T) {
 	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
 
-	val := Find(con.Root, 11)
+	val := con.Find(con.Root, 11)
 	assert.Equal(t, "11", val)
 
-	val2 := Find(con.Root, 9)
+	val2 := con.Find(con.Root, 9)
 	assert.Equal(t, "9", val2)
 
-	val3 := Find(con.Root, 100)
+	val3 := con.Find(con.Root, 100)
 	assert.Equal(t, nil, val3)
 
-	val4 := Find(con.Root, 1)
+	val4 := con.Find(con.Root, 1)
 	assert.Equal(t, nil, val4)
 }
 
@@ -132,9 +132,9 @@ func TestTreeNode_DeleteNodeWithTwoChildren(t *testing.T) {
 	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
 
-	Delete(con.Root, 10)
+	con.Delete(con.Root, 10)
 
-	assert.Equal(t, nil, Find(con.Root, 10))
+	assert.Equal(t, nil, con.Find(con.Root, 10))
 	assert.Equal(t, 11, con.Root.Right.Key)
 	assert.Equal(t, 9, con.Root.Right.Left.Key)
 }
@@ -145,8 +145,8 @@ func TestTreeNode_DeleteNodeWithOneChild(t *testing.T) {
 	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
 
-	Delete(con.Root, 6)
-	assert.Equal(t, nil, Find(con.Root, 6))
+	con.Delete(con.Root, 6)
+	assert.Equal(t, nil, con.Find(con.Root, 6))
 	assert.Equal(t, 7, con.Root.Left.Right.Key)
 }
 
@@ -169,8 +169,8 @@ func TestGenerateBinaryTree(t *testing.T) {
 
 		n := rand.Intn(num)
 
-		if Find(con.Root, n) == nil {
-			err := Insert(con.Root, n, fmt.Sprintf("%d", n))
+		if con.Find(con.Root, n) == nil {
+			err := con.Insert(con.Root, n, fmt.Sprintf("%d", n))
 			assert.NoError(t, err)
 		}
 	}
@@ -182,3 +182,5 @@ func TestGenerateBinaryTree(t *testing.T) {
 	assert.NoError(t, err)
 
 }
+
+// TODO: add more tests for delete
