@@ -186,36 +186,3 @@ func TestTreeNode_DeleteRootNode(t *testing.T) {
 	assert.Equal(t, nil, con.Find(con.Root, 8))
 	assert.Equal(t, 4, con.Root.GetLeft().GetKey())
 }
-
-//func TestGenerateBinaryTree(t *testing.T) {
-//
-//	l := log.NewLogger()
-//
-//	con, err := NewBstContainer(nil, l)
-//	assert.NoError(t, err)
-//
-//	num := 100000
-//
-//	rootKey := num / 2
-//	rootValue := fmt.Sprintf("%d", rootKey)
-//
-//	con.Root.Key = rootKey
-//	con.Root.Value = rootValue
-//
-//	for i := 1; i < num; i++ {
-//
-//		n := rand.Intn(num)
-//
-//		if con.Find(con.Root, n) == nil {
-//			err := con.Insert(con.Root, n, fmt.Sprintf("%d", n))
-//			assert.NoError(t, err)
-//		}
-//	}
-//
-//	file, err := json.Marshal(con.Root)
-//	assert.NoError(t, err)
-//
-//	err = ioutil.WriteFile("generated.json", file, 0644)
-//	assert.NoError(t, err)
-//
-//}
