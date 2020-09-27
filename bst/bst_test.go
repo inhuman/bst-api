@@ -1,24 +1,24 @@
 package bst
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/inhuman/bst-api/log"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"math/rand"
 	"testing"
 )
 
 var jsonData = `{
   "key": 8,
-  "value": "Root",
+  "value": "root",
   "left": {
     "key": 4,
     "value": "4",
     "left": {
       "key": 2,
-      "value": "2"
+      "value": "2",
+      "left": {
+        "key": 1,
+        "value": "1"
+      }
     },
     "right": {
       "key": 6,
@@ -65,6 +65,15 @@ func TestNewBstContainerEmptyTree(t *testing.T) {
 	con, err := NewBstContainer(nil, l)
 	assert.NoError(t, err)
 	assert.NotNil(t, con)
+}
+
+func TestNewBstContainerBadJson(t *testing.T) {
+
+	l := log.NewLogger()
+
+	con, err := NewBstContainer([]byte("bad json"), l)
+	assert.Error(t, err)
+	assert.Equal(t, (*Container)(nil), con)
 }
 
 func TestTreeNode_Insert(t *testing.T) {
@@ -121,9 +130,6 @@ func TestTreeNode_Find(t *testing.T) {
 
 	val3 := con.Find(con.Root, 100)
 	assert.Equal(t, nil, val3)
-
-	val4 := con.Find(con.Root, 1)
-	assert.Equal(t, nil, val4)
 }
 
 func TestTreeNode_DeleteNodeWithTwoChildren(t *testing.T) {
@@ -139,7 +145,7 @@ func TestTreeNode_DeleteNodeWithTwoChildren(t *testing.T) {
 	assert.Equal(t, 9, con.Root.Right.Left.Key)
 }
 
-func TestTreeNode_DeleteNodeWithOneChild(t *testing.T) {
+func TestTreeNode_DeleteNodeWithOneRightChild(t *testing.T) {
 	l := log.NewLogger()
 
 	con, err := NewBstContainer([]byte(jsonData), l)
@@ -150,37 +156,66 @@ func TestTreeNode_DeleteNodeWithOneChild(t *testing.T) {
 	assert.Equal(t, 7, con.Root.Left.Right.Key)
 }
 
-func TestGenerateBinaryTree(t *testing.T) {
-
+func TestTreeNode_DeleteNodeWithNOneLeftChild(t *testing.T) {
 	l := log.NewLogger()
 
-	con, err := NewBstContainer(nil, l)
+	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
 
-	num := 100000
-
-	rootKey := num / 2
-	rootValue := fmt.Sprintf("%d", rootKey)
-
-	con.Root.Key = rootKey
-	con.Root.Value = rootValue
-
-	for i := 1; i < num; i++ {
-
-		n := rand.Intn(num)
-
-		if con.Find(con.Root, n) == nil {
-			err := con.Insert(con.Root, n, fmt.Sprintf("%d", n))
-			assert.NoError(t, err)
-		}
-	}
-
-	file, err := json.Marshal(con.Root)
-	assert.NoError(t, err)
-
-	err = ioutil.WriteFile("generated.json", file, 0644)
-	assert.NoError(t, err)
-
+	con.Delete(con.Root, 2)
+	assert.Equal(t, nil, con.Find(con.Root, 2))
 }
 
-// TODO: add more tests for delete
+func TestTreeNode_DeleteNodeWithNoChild(t *testing.T) {
+	l := log.NewLogger()
+
+	con, err := NewBstContainer([]byte(jsonData), l)
+	assert.NoError(t, err)
+
+	con.Delete(con.Root, 1)
+	assert.Equal(t, nil, con.Find(con.Root, 1))
+}
+
+func TestTreeNode_DeleteRootNode(t *testing.T) {
+	l := log.NewLogger()
+
+	con, err := NewBstContainer([]byte(jsonData), l)
+	assert.NoError(t, err)
+
+	con.Delete(con.Root, 8)
+	assert.Equal(t, nil, con.Find(con.Root, 8))
+	assert.Equal(t, 4, con.Root.Left.Key)
+}
+
+//func TestGenerateBinaryTree(t *testing.T) {
+//
+//	l := log.NewLogger()
+//
+//	con, err := NewBstContainer(nil, l)
+//	assert.NoError(t, err)
+//
+//	num := 100000
+//
+//	rootKey := num / 2
+//	rootValue := fmt.Sprintf("%d", rootKey)
+//
+//	con.Root.Key = rootKey
+//	con.Root.Value = rootValue
+//
+//	for i := 1; i < num; i++ {
+//
+//		n := rand.Intn(num)
+//
+//		if con.Find(con.Root, n) == nil {
+//			err := con.Insert(con.Root, n, fmt.Sprintf("%d", n))
+//			assert.NoError(t, err)
+//		}
+//	}
+//
+//	file, err := json.Marshal(con.Root)
+//	assert.NoError(t, err)
+//
+//	err = ioutil.WriteFile("generated.json", file, 0644)
+//	assert.NoError(t, err)
+//
+//}
