@@ -93,7 +93,26 @@ func (con *Container) DeleteByKey(c *gin.Context) {
 	}
 }
 
+type InsertParams struct {
+	Key   int         `json:"key"`
+	Value interface{} `json:"value"`
+}
+
 func (con *Container) Insert(c *gin.Context) {
 
-	// TODO: add post,
+	p := InsertParams{}
+
+	err := c.BindJSON(&p)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	err = con.BstContainer.Insert(con.BstContainer.Root, p.Key, p.Value)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.AbortWithStatus(http.StatusOK)
 }
