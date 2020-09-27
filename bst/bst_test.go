@@ -49,13 +49,13 @@ func TestNewBstContainer(t *testing.T) {
 
 	con, err := NewBstContainer([]byte(jsonData), l)
 	assert.NoError(t, err)
-	assert.Equal(t, 8, con.Root.Key)
-	assert.Equal(t, 4, con.Root.Left.Key)
-	assert.Equal(t, 2, con.Root.Left.Left.Key)
-	assert.Equal(t, 6, con.Root.Left.Right.Key)
-	assert.Equal(t, 10, con.Root.Right.Key)
-	assert.Equal(t, 11, con.Root.Right.Right.Key)
-	assert.Equal(t, 9, con.Root.Right.Left.Key)
+	assert.Equal(t, 8, con.Root.GetKey())
+	assert.Equal(t, 4, con.Root.GetLeft().GetKey())
+	assert.Equal(t, 2, con.Root.GetLeft().GetLeft().GetKey())
+	assert.Equal(t, 6, con.Root.GetLeft().GetRight().GetKey())
+	assert.Equal(t, 10, con.Root.GetRight().GetKey())
+	assert.Equal(t, 11, con.Root.GetRight().GetRight().GetKey())
+	assert.Equal(t, 9, con.Root.GetRight().GetLeft().GetKey())
 }
 
 func TestNewBstContainerEmptyTree(t *testing.T) {
@@ -96,11 +96,11 @@ func TestTreeNode_Insert(t *testing.T) {
 	err = con.Insert(con.Root, 4, "4")
 	assert.NoError(t, err)
 
-	assert.Equal(t, 10, con.Root.Key)
-	assert.Equal(t, 2, con.Root.Left.Key)
-	assert.Equal(t, 12, con.Root.Right.Key)
-	assert.Equal(t, 11, con.Root.Right.Left.Key)
-	assert.Equal(t, 4, con.Root.Left.Right.Key)
+	assert.Equal(t, 10, con.Root.GetKey())
+	assert.Equal(t, 2, con.Root.GetLeft().GetKey())
+	assert.Equal(t, 12, con.Root.GetRight().GetKey())
+	assert.Equal(t, 11, con.Root.GetRight().GetLeft().GetKey())
+	assert.Equal(t, 4, con.Root.GetLeft().GetRight().GetKey())
 }
 
 func TestTreeNode_InsertExists(t *testing.T) {
@@ -141,8 +141,8 @@ func TestTreeNode_DeleteNodeWithTwoChildren(t *testing.T) {
 	con.Delete(con.Root, 10)
 
 	assert.Equal(t, nil, con.Find(con.Root, 10))
-	assert.Equal(t, 11, con.Root.Right.Key)
-	assert.Equal(t, 9, con.Root.Right.Left.Key)
+	assert.Equal(t, 11, con.Root.GetRight().GetKey())
+	assert.Equal(t, 9, con.Root.GetRight().GetLeft().GetKey())
 }
 
 func TestTreeNode_DeleteNodeWithOneRightChild(t *testing.T) {
@@ -153,7 +153,7 @@ func TestTreeNode_DeleteNodeWithOneRightChild(t *testing.T) {
 
 	con.Delete(con.Root, 6)
 	assert.Equal(t, nil, con.Find(con.Root, 6))
-	assert.Equal(t, 7, con.Root.Left.Right.Key)
+	assert.Equal(t, 7, con.Root.GetLeft().GetRight().GetKey())
 }
 
 func TestTreeNode_DeleteNodeWithNOneLeftChild(t *testing.T) {
@@ -184,7 +184,7 @@ func TestTreeNode_DeleteRootNode(t *testing.T) {
 
 	con.Delete(con.Root, 8)
 	assert.Equal(t, nil, con.Find(con.Root, 8))
-	assert.Equal(t, 4, con.Root.Left.Key)
+	assert.Equal(t, 4, con.Root.GetLeft().GetKey())
 }
 
 //func TestGenerateBinaryTree(t *testing.T) {

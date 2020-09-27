@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/inhuman/bst-api/bst"
+	"github.com/inhuman/bst-api/interfaces"
 	"github.com/rs/zerolog"
 	"net/http"
 	"strconv"
 )
 
 type Opts struct {
-	BstContainer *bst.Container
+	BstContainer interfaces.Container
 	Logger       *zerolog.Logger
 }
 
 type Container struct {
-	BstContainer *bst.Container
+	BstContainer interfaces.Container
 }
 
 func Run(opts Opts) error {
@@ -34,14 +34,22 @@ func Run(opts Opts) error {
 		UTC:    true,
 	}))
 
-	r.GET("/search", con.GetByKey)
-	r.POST("/insert", con.Insert)
-	r.DELETE("/delete", con.DeleteByKey)
+	r.GET("/search", func(context *gin.Context) {
+		con.GetByKey(context)
+	})
+
+	r.POST("/insert", func(context *gin.Context) {
+		con.Insert(context)
+	})
+
+	r.DELETE("/delete", func(context *gin.Context) {
+		con.DeleteByKey(context)
+	})
 
 	return r.Run(":8080")
 }
 
-func (con *Container) GetByKey(c *gin.Context) {
+func (con *Container) GetByKey(c interfaces.GinContext) {
 
 	keyStr := c.Query("val")
 
@@ -53,7 +61,7 @@ func (con *Container) GetByKey(c *gin.Context) {
 			return
 		}
 
-		val := con.BstContainer.Find(con.BstContainer.Root, int(key))
+		val := con.BstContainer.Find(con.BstContainer.GetRoot(), int(key))
 
 		if val == nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -68,7 +76,7 @@ func (con *Container) GetByKey(c *gin.Context) {
 	}
 }
 
-func (con *Container) DeleteByKey(c *gin.Context) {
+func (con *Container) DeleteByKey(c interfaces.GinContext) {
 	keyStr := c.Query("val")
 
 	if keyStr != "" {
@@ -79,7 +87,7 @@ func (con *Container) DeleteByKey(c *gin.Context) {
 			return
 		}
 
-		val := con.BstContainer.Find(con.BstContainer.Root, int(key))
+		val := con.BstContainer.Find(con.BstContainer.GetRoot(), int(key))
 
 		if val == nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -88,7 +96,7 @@ func (con *Container) DeleteByKey(c *gin.Context) {
 			return
 		}
 
-		con.BstContainer.Delete(con.BstContainer.Root, int(key))
+		con.BstContainer.Delete(con.BstContainer.GetRoot(), int(key))
 		c.AbortWithStatus(http.StatusOK)
 	}
 }
@@ -98,7 +106,7 @@ type InsertParams struct {
 	Value interface{} `json:"value"`
 }
 
-func (con *Container) Insert(c *gin.Context) {
+func (con *Container) Insert(c interfaces.GinContext) {
 
 	p := InsertParams{}
 
@@ -108,7 +116,7 @@ func (con *Container) Insert(c *gin.Context) {
 		return
 	}
 
-	err = con.BstContainer.Insert(con.BstContainer.Root, p.Key, p.Value)
+	err = con.BstContainer.Insert(con.BstContainer.GetRoot(), p.Key, p.Value)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
