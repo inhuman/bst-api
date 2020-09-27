@@ -10,6 +10,7 @@ notifications:
 env:
   - GO111MODULE=on
 
+
 jobs:
   include:
     - stage: Test
