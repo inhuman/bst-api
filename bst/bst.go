@@ -14,9 +14,16 @@ type Container struct {
 
 func NewBstContainer(jsonData []byte, logger *zerolog.Logger) (*Container, error) {
 
+	l := logger.With().Str("source", "bst").Logger()
+	l.Debug().Str("event", "create new bst container").Send()
+
 	root := TreeNode{}
 
 	if jsonData != nil {
+		l.Debug().
+			Str("event", "fill bst from json data").
+			Send()
+
 		err := json.Unmarshal(jsonData, &root)
 		if err != nil {
 			return nil, err
@@ -25,7 +32,7 @@ func NewBstContainer(jsonData []byte, logger *zerolog.Logger) (*Container, error
 
 	con := &Container{
 		Root:   &root,
-		Logger: logger,
+		Logger: &l,
 	}
 
 	return con, nil
@@ -40,13 +47,33 @@ type TreeNode struct {
 
 func (con *Container) Insert(n *TreeNode, key int, value interface{}) error {
 
+	con.Logger.Debug().
+		Str("event", fmt.Sprintf("processing insert key: %d, value: %v", key, value)).
+		Send()
+
 	switch {
 
 	case n.Key == key:
+		con.Logger.Debug().
+			Str("event", fmt.Sprintf("key %d exists, return error", key)).
+			Send()
+
 		return fmt.Errorf("key exists: %d", key)
 
 	case n.Key > key:
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d smaller than current node key %d, processing left node", key, n.Key)).
+			Send()
+
 		if n.Left == nil {
+
+			con.Logger.Debug().
+				Str("event",
+					fmt.Sprintf("left node not exists, create new one with key: %d, value: %v", key, value)).
+				Send()
+
 			n.Left = &TreeNode{
 				Key:   key,
 				Value: value,
@@ -57,7 +84,19 @@ func (con *Container) Insert(n *TreeNode, key int, value interface{}) error {
 		return con.Insert(n.Left, key, value)
 
 	case n.Key < key:
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d bigger than current node key %d, processing right node", key, n.Key)).
+			Send()
+
 		if n.Right == nil {
+
+			con.Logger.Debug().
+				Str("event",
+					fmt.Sprintf("right node not exists, create new one with key: %d, value: %v", key, value)).
+				Send()
+
 			n.Right = &TreeNode{
 				Key:   key,
 				Value: value,
@@ -74,19 +113,52 @@ func (con *Container) Insert(n *TreeNode, key int, value interface{}) error {
 
 func (con *Container) Find(n *TreeNode, key int) interface{} {
 
+	con.Logger.Debug().
+		Str("event", fmt.Sprintf("processing search key: %d", key)).
+		Send()
+
 	switch {
 	case n.Key == key:
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d equal current node key, return value: %v", key, n.Value)).
+			Send()
+
 		return n.Value
 
 	case n.Key > key:
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d smaller than current node key %d, processing left node", key, n.Key)).
+			Send()
+
 		if n.Left == nil {
+
+			con.Logger.Debug().
+				Str("event",
+					fmt.Sprintf("left node not exists, no record for key %d", key)).
+				Send()
+
 			return nil
 		}
 
 		return con.Find(n.Left, key)
 
 	case n.Key < key:
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d bigger than current node key %d, processing right node", key, n.Key)).
+			Send()
+
 		if n.Right == nil {
+
+			con.Logger.Debug().
+				Str("event",
+					fmt.Sprintf("right node not exists, no record for key %d", key)).
+				Send()
+
 			return nil
 		}
 
@@ -97,38 +169,75 @@ func (con *Container) Find(n *TreeNode, key int) interface{} {
 	}
 }
 
-func (con *Container) Delete(node *TreeNode, key int) *TreeNode {
+func (con *Container) Delete(n *TreeNode, key int) *TreeNode {
+
+	con.Logger.Debug().
+		Str("event", fmt.Sprintf("processing delete key: %d", key)).
+		Send()
 
 	switch {
 
-	case node == nil:
-		return nil
+	case n.Key > key:
 
-	case node.Key > key:
-		node.Left = con.Delete(node.Left, key)
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d smaller than current node key %d, processing left node", key, n.Key)).
+			Send()
 
-	case node.Key < key:
-		node.Right = con.Delete(node.Right, key)
+		n.Left = con.Delete(n.Left, key)
 
-	case (node.Left != nil) && (node.Right != nil):
-		minNode := con.minNode(node.Right)
+	case n.Key < key:
 
-		node.Key = minNode.Key
-		node.Value = minNode.Value
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d bigger than current node key %d, processing right node", key, n.Key)).
+			Send()
 
-		node.Right = con.Delete(node.Right, node.Key)
+		n.Right = con.Delete(n.Right, key)
 
-	case (node.Left != nil) && (node.Right == nil):
-		node = node.Left
+	case (n.Key == key) && (n.Left != nil) && (n.Right != nil):
 
-	case (node.Left == nil) && (node.Right != nil):
-		node = node.Right
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d equal node key, node has left and right children", key)).
+			Send()
+
+		minNode := con.minNode(n.Right)
+
+		n.Key = minNode.Key
+		n.Value = minNode.Value
+
+		n.Right = con.Delete(n.Right, n.Key)
+
+	case (n.Key == key) && (n.Left != nil) && (n.Right == nil):
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d equal node key, node has only left child", key)).
+			Send()
+
+		n = n.Left
+
+	case (n.Key == key) && (n.Left == nil) && (n.Right != nil):
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d equal node key, node has only right child", key)).
+			Send()
+
+		n = n.Right
 
 	default:
-		node = nil
+
+		con.Logger.Debug().
+			Str("event",
+				fmt.Sprintf("key %d equal node key, node is child free", key)).
+			Send()
+
+		n = nil
 	}
 
-	return node
+	return n
 }
 
 func (con *Container) minNode(n *TreeNode) *TreeNode {

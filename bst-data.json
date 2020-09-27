@@ -6,7 +6,11 @@
     "value": "4",
     "left": {
       "key": 2,
-      "value": "2"
+      "value": "2",
+      "left": {
+        "key": 1,
+        "value": "1"
+      }
     },
     "right": {
       "key": 6,
