@@ -10,10 +10,6 @@ import (
 	"os"
 )
 
-// TODO: add tests for other packages
-// TODO: add travis
-// TODO: add code coverage
-
 func main() {
 
 	l := log.NewLogger()
@@ -25,7 +21,6 @@ func main() {
 	} else {
 		os.Exit(0)
 	}
-
 }
 
 func realMain(l *zerolog.Logger) error {
